@@ -36,7 +36,11 @@ export default function Sidebar() {
       </div>
 
       <div className="mt-8 space-y-4 text-gray-300">
-        <button onClick={createPlaylist} className="flex items-center gap-4 hover:text-white transition w-full">
+        <button onClick={() => {
+          const name = prompt('Enter playlist name:');
+          if (name) createPlaylist(name);
+          else createPlaylist();
+        }} className="flex items-center gap-4 hover:text-white transition w-full">
           <div className="bg-gray-300 p-1 text-black rounded-sm">
             <PlusSquare className="w-4 h-4" />
           </div>

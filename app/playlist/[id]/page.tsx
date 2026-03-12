@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { useLibraryStore } from '../../../store/useLibraryStore';
 import { usePlayerStore } from '../../../store/usePlayerStore';
 import { Play } from 'lucide-react';
-import { playlists as defaultPlaylists } from '../../../lib/data';
+import { playlists as defaultPlaylists, mockSongs } from '../../../lib/data';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -13,7 +13,7 @@ interface PageProps {
 
 export default function PlaylistPage({ params }: PageProps) {
   const resolvedParams = use(params);
-  const { customPlaylists } = useLibraryStore();
+  const { customPlaylists, addSongToPlaylist } = useLibraryStore();
   const { playSong, setPlaylist, currentSong, isPlaying } = usePlayerStore();
 
   // Find playlist in custom first, then in defaults
@@ -23,6 +23,9 @@ export default function PlaylistPage({ params }: PageProps) {
   if (!playlist) {
     notFound();
   }
+
+  const isCustom = playlist.id.startsWith('custom_');
+  const recommendedSongs = mockSongs.filter(s => !playlist.songs.find(ps => ps.id === s.id));
 
   const handlePlayAll = () => {
     if (playlist.songs.length > 0) {
@@ -65,7 +68,7 @@ export default function PlaylistPage({ params }: PageProps) {
         {playlist.songs.length === 0 ? (
            <div className="text-gray-400 mt-10 p-6 bg-white/5 rounded-lg text-center">
              <h2 className="text-xl font-bold text-white mb-2">It's a bit empty here...</h2>
-             <p>Use Search to find songs and add them to your playlists! (Well, maybe in the next update 😉)</p>
+             <p>Use Search to find songs and add them to your playlists! (Or check below 😉)</p>
            </div>
         ) : (
           <div className="space-y-1 mt-4">
@@ -106,6 +109,33 @@ export default function PlaylistPage({ params }: PageProps) {
           </div>
         )}
       </div>
+
+      {/* Suggested Songs */}
+      {isCustom && recommendedSongs.length > 0 && (
+        <div className="mt-12 pt-8 border-t border-white/10">
+          <h2 className="text-2xl font-bold mb-4">Recommended</h2>
+          <p className="text-sm text-gray-400 mb-6">Based on what's in this playlist</p>
+          <div className="space-y-2">
+            {recommendedSongs.map(song => (
+              <div key={song.id} className="flex items-center justify-between p-2 rounded-md hover:bg-white/10 transition group">
+                <div className="flex items-center gap-4">
+                  <img src={song.coverUrl} className="w-10 h-10 rounded object-cover" alt={song.title} />
+                  <div>
+                    <p className="text-white font-semibold">{song.title}</p>
+                    <p className="text-sm text-gray-400">{song.artist}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => addSongToPlaylist(playlist.id, song)}
+                  className="px-4 py-1 rounded-full border border-gray-500 hover:border-white hover:scale-105 transition text-sm font-semibold text-white ml-4"
+                >
+                  Add
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,10 +3,12 @@
 import React from 'react';
 import { playlists, mockSongs } from '../lib/data';
 import { usePlayerStore } from '../store/usePlayerStore';
-import { Play } from 'lucide-react';
+import { useLibraryStore } from '../store/useLibraryStore';
+import { Play, Heart } from 'lucide-react';
 
 export default function Home() {
   const { playSong, currentSong, isPlaying } = usePlayerStore();
+  const { toggleLikeSong, isSongLiked } = useLibraryStore();
 
   return (
     <div className="flex-1 overflow-y-auto px-6 pt-6 pb-32 w-full text-white bg-gradient-to-b from-[#1f1f1f] to-[#121212]">
@@ -43,6 +45,7 @@ export default function Home() {
       <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar">
         {mockSongs.map((song) => {
           const isActive = currentSong?.id === song.id;
+          const liked = isSongLiked(song.id);
 
           return (
             <div 
@@ -58,9 +61,20 @@ export default function Home() {
                   <Play className="w-5 h-5 ml-1" fill="currentColor" />
                 </button>
               </div>
-              <h3 className={`font-semibold mb-1 truncate ${isActive ? 'text-[#1db954]' : 'text-white'}`}>
-                {song.title}
-              </h3>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className={`font-semibold truncate ${isActive ? 'text-[#1db954]' : 'text-white'}`}>
+                  {song.title}
+                </h3>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleLikeSong(song);
+                  }}
+                  className="hover:scale-110 transition"
+                >
+                  <Heart className="w-4 h-4" fill={liked ? '#1db954' : 'none'} color={liked ? '#1db954' : 'gray'} />
+                </button>
+              </div>
               <p className="text-sm text-[#b3b3b3] truncate">{song.artist}</p>
             </div>
           );
